@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight ID Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08111f;
+      --panel: rgba(11, 19, 34, 0.88);
+      --panel-2: rgba(18, 28, 49, 0.92);
+      --text: #eef4ff;
+      --muted: #93a5c8;
+      --line: rgba(255,255,255,0.08);
+      --accent: #7cf8ff;
+      --accent-2: #ff7de9;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      --radius: 22px;
+      --radius-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(109, 91, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 85% 10%, rgba(255, 71, 193, 0.16), transparent 30%),
+        linear-gradient(180deg, #07101c 0%, #040812 48%, #02050b 100%);
+      color: var(--text);
+      padding: 22px;
+    }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 8px 4px 0;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -0.05em;
+    }
+
+    .title-block p {
+      margin: 8px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 0.9rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(340px, 420px);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .preview-card {
+      padding: 16px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .preview-frame {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      border: 1px solid rgba(255,255,255,0.08);
+      aspect-ratio: 16 / 9;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 24px 60px rgba(0,0,0,0.42);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #04050a;
+    }
+
+    .preview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(124, 248, 255, 0.25), rgba(255, 125, 233, 0.2));
+      border-color: rgba(124, 248, 255, 0.35);
+    }
+
+    button.ghost {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .controls {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      background: var(--panel-2);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .section p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(124,248,255,0.45);
+      background: rgba(255,255,255,0.06);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .range-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .range-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      background: transparent;
+      border: 0;
+    }
+
+    .toggle-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 13px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .toggle span {
+      font-size: 0.94rem;
+    }
+
+    .toggle input[type="checkbox"] {
+      width: 48px;
+      height: 28px;
+      appearance: none;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .toggle input[type="checkbox"]::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      top: 3px;
+      left: 4px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.28);
+    }
+
+    .toggle input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, rgba(124,248,255,0.55), rgba(255,125,233,0.55));
+    }
+
+    .toggle input[type="checkbox"]:checked::after {
+      transform: translateX(19px);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-size: 0.86rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.16s ease;
+    }
+
+    .chip.active {
+      border-color: rgba(124,248,255,0.34);
+      background: linear-gradient(135deg, rgba(124,248,255,0.18), rgba(255,125,233,0.16));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .script-box {
+      border-radius: 16px;
+      background: rgba(6,10,18,0.75);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 14px;
+      color: #dbe8ff;
+      line-height: 1.6;
+      font-size: 0.96rem;
+      white-space: pre-wrap;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      padding: 4px 0 12px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1120px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-card {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-actions button,
+      .topbar .pill-row {
+        width: 100%;
+      }
+
+      .preview-actions button {
+        flex: 1 1 calc(50% - 10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="title-block">
+        <h1>Midnight ID Studio</h1>
+        <p>Design a fake late-night TV station ident in real time — all neon bloom, scanlines, synth stingers, and Palm Springs after-dark energy.</p>
+      </div>
+      <div class="pill-row">
+        <div class="pill">One-file creative toy</div>
+        <div class="pill">Live animated canvas</div>
+        <div class="pill">PNG export + synth sting</div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card preview-card">
+        <div class="preview-meta">
+          <span id="liveMode">Live scene · Orbit Bloom</span>
+          <span>16:9 broadcast frame</span>
+        </div>
+        <div class="preview-frame">
+          <canvas id="preview" width="1280" height="720" aria-label="Animated TV ident preview"></canvas>
+        </div>
+        <div class="preview-actions">
+          <button class="primary" id="randomizeBtn">Surprise me</button>
+          <button id="stingerBtn">Play stinger</button>
+          <button id="exportBtn">Export PNG</button>
+          <button class="ghost" id="copyScriptBtn">Copy voiceover</button>
+        </div>
+      </section>
+
+      <aside class="card controls">
+        <section class="section">
+          <h2>Station</h2>
+          <p>Make up a channel, show, and midnight bumper vibe.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="stationInput">Call sign</label>
+              <input id="stationInput" type="text" maxlength="18" value="KPSM 77" />
+            </div>
+            <div class="field">
+              <label for="cityInput">City</label>
+              <input id="cityInput" type="text" maxlength="24" value="Palm Springs" />
+            </div>
+            <div class="field full">
+              <label for="showInput">Feature title</label>
+              <input id="showInput" type="text" maxlength="34" value="Midnight Mirage" />
+            </div>
+            <div class="field full">
+              <label for="taglineInput">Tagline</label>
+              <input id="taglineInput" type="text" maxlength="50" value="Movies, static, and impossible weather." />
+            </div>
+            <div class="field">
+              <label for="timeInput">On-air time</label>
+              <input id="timeInput" type="text" maxlength="16" value="11:45 PM" />
+            </div>
+            <div class="field">
+              <label for="styleSelect">Scene style</label>
+              <select id="styleSelect"></select>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Color worlds</h2>
+          <p>Tap a palette or let the reels decide.</p>
+          <div class="chips" id="paletteChips"></div>
+        </section>
+
+        <section class="section">
+          <h2>Broadcast feel</h2>
+          <div class="range-row">
+            <div class="range-meta"><span>Bloom</span><span id="bloomValue">82%</span></div>
+            <input id="bloomRange" type="range" min="0" max="100" value="82" />
+          </div>
+          <div class="range-row">
+            <div class="range-meta"><span>Static</span><span id="noiseValue">22%</span></div>
+            <input id="noiseRange" type="range" min="0" max="100" value="22" />
+          </div>
+          <div class="range-row">
+            <div class="range-meta"><span>Scanlines</span><span id="scanValue">34%</span></div>
+            <input id="scanRange" type="range" min="0" max="100" value="34" />
+          </div>
+          <div class="range-row">
+            <div class="range-meta"><span>Warp</span><span id="warpValue">24%</span></div>
+            <input id="warpRange" type="range" min="0" max="100" value="24" />
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Screen dressing</h2>
+          <div class="toggle-row">
+            <label class="toggle"><span>Channel bug</span><input id="bugToggle" type="checkbox" checked /></label>
+            <label class="toggle"><span>Lower third</span><input id="lowerThirdToggle" type="checkbox" checked /></label>
+            <label class="toggle"><span>Star field</span><input id="starsToggle" type="checkbox" checked /></label>
+            <label class="toggle"><span>Signal bars</span><input id="barsToggle" type="checkbox" checked /></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Voiceover copy</h2>
+          <p>It updates with the station setup, like a bumper script somebody recorded at 1:12 AM.</p>
+          <div class="script-box" id="scriptBox"></div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="footer-note">Tip: hit <strong>Surprise me</strong> a few times — some presets get delightfully unhinged.</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('preview');
+    const ctx = canvas.getContext('2d');
+
+    const palettes = {
+      'Neon Mirage': { bgA: '#10092f', bgB: '#060913', accent: '#73f7ff', accent2: '#ff69da', text: '#edf5ff', grid: '#4534a2', glow: '#8efbff' },
+      'Desert Sunset': { bgA: '#301221', bgB: '#11060f', accent: '#ff9966', accent2: '#ffd166', text: '#fff1de', grid: '#8e3e4f', glow: '#ffb577' },
+      'Pool Blue': { bgA: '#0c2037', bgB: '#040a13', accent: '#75f4ff', accent2: '#52c4ff', text: '#effcff', grid: '#234f73', glow: '#a4fdff' },
+      'Casino Heat': { bgA: '#2f0918', bgB: '#12040b', accent: '#ff5d7d', accent2: '#ffd54f', text: '#fff6df', grid: '#8f2640', glow: '#ff879b' },
+      'Afterglow Lime': { bgA: '#102217', bgB: '#050b08', accent: '#b9ff56', accent2: '#65f8d0', text: '#efffe3', grid: '#37623b', glow: '#d1ff96' },
+      'Noir Gold': { bgA: '#19130e', bgB: '#080706', accent: '#ffd166', accent2: '#fca311', text: '#fff8e7', grid: '#574226', glow: '#ffe39b' }
+    };
+
+    const scenes = {
+      orbit: 'Orbit Bloom',
+      tunnel: 'Velocity Tunnel',
+      grid: 'Grid Horizon',
+      spotlight: 'Spotlight Crush',
+      eclipse: 'Eclipse Burst'
+    };
+
+    const concepts = [
+      { station: 'KPSM 77', show: 'Midnight Mirage', tagline: 'Movies, static, and impossible weather.', city: 'Palm Springs', time: '11:45 PM' },
+      { station: 'KOLA 9', show: 'Velvet Hotline', tagline: 'The smoothest calls after the casino closes.', city: 'Cathedral City', time: '12:07 AM' },
+      { station: 'KVHS 88', show: 'Tape Dust Cinema', tagline: 'Found footage from a kinder timeline.', city: 'Palm Desert', time: '1:13 AM' },
+      { station: 'KJCK 11', show: 'Jackpot Weather', tagline: 'Tonight: hot winds and reckless optimism.', city: 'Rancho Mirage', time: '10:58 PM' },
+      { station: 'KOAS 65', show: 'Poollight Theater', tagline: 'Soft focus thrillers by moonlit water.', city: 'La Quinta', time: '12:31 AM' },
+      { station: 'KMOT 3', show: 'Motel Parade', tagline: 'Where every sign hums back.', city: 'Palm Springs', time: '11:18 PM' }
+    ];
+
+    const vibeBits = ['silk static', 'neon weather', 'desert velvet', 'poolside thunder', 'late checkout glamour', 'after-hours color'];
+
+    const state = {
+      station: 'KPSM 77',
+      city: 'Palm Springs',
+      show: 'Midnight Mirage',
+      tagline: 'Movies, static, and impossible weather.',
+      time: '11:45 PM',
+      palette: 'Neon Mirage',
+      scene: 'orbit',
+      bloom: 0.82,
+      noise: 0.22,
+      scanlines: 0.34,
+      warp: 0.24,
+      bug: true,
+      lowerThird: true,
+      stars: true,
+      bars: true
+    };
+
+    const els = {
+      station: document.getElementById('stationInput'),
+      city: document.getElementById('cityInput'),
+      show: document.getElementById('showInput'),
+      tagline: document.getElementById('taglineInput'),
+      time: document.getElementById('timeInput'),
+      style: document.getElementById('styleSelect'),
+      paletteChips: document.getElementById('paletteChips'),
+      bloom: document.getElementById('bloomRange'),
+      noise: document.getElementById('noiseRange'),
+      scan: document.getElementById('scanRange'),
+      warp: document.getElementById('warpRange'),
+      bloomValue: document.getElementById('bloomValue'),
+      noiseValue: document.getElementById('noiseValue'),
+      scanValue: document.getElementById('scanValue'),
+      warpValue: document.getElementById('warpValue'),
+      bug: document.getElementById('bugToggle'),
+      lowerThird: document.getElementById('lowerThirdToggle'),
+      stars: document.getElementById('starsToggle'),
+      bars: document.getElementById('barsToggle'),
+      script: document.getElementById('scriptBox'),
+      liveMode: document.getElementById('liveMode'),
+      randomize: document.getElementById('randomizeBtn'),
+      stinger: document.getElementById('stingerBtn'),
+      export: document.getElementById('exportBtn'),
+      copyScript: document.getElementById('copyScriptBtn')
+    };
+
+    Object.entries(scenes).forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      els.style.appendChild(option);
+    });
+
+    function buildPaletteChips() {
+      els.paletteChips.innerHTML = '';
+      Object.keys(palettes).forEach((name) => {
+        const chip = document.createElement('button');
+        chip.className = `chip ${state.palette === name ? 'active' : ''}`;
+        chip.textContent = name;
+        chip.type = 'button';
+        chip.addEventListener('click', () => {
+          state.palette = name;
+          syncUI();
+        });
+        els.paletteChips.appendChild(chip);
+      });
+    }
+
+    function updateScript() {
+      const flourish = vibeBits[Math.floor(Math.random() * vibeBits.length)];
+      els.script.textContent = `"From ${state.city}, this is ${state.station}... where ${flourish} meets ${state.show}. Tonight at ${state.time}: ${state.tagline}"`;
+    }
+
+    function syncUI() {
+      els.station.value = state.station;
+      els.city.value = state.city;
+      els.show.value = state.show;
+      els.tagline.value = state.tagline;
+      els.time.value = state.time;
+      els.style.value = state.scene;
+      els.bloom.value = Math.round(state.bloom * 100);
+      els.noise.value = Math.round(state.noise * 100);
+      els.scan.value = Math.round(state.scanlines * 100);
+      els.warp.value = Math.round(state.warp * 100);
+      els.bloomValue.textContent = `${Math.round(state.bloom * 100)}%`;
+      els.noiseValue.textContent = `${Math.round(state.noise * 100)}%`;
+      els.scanValue.textContent = `${Math.round(state.scanlines * 100)}%`;
+      els.warpValue.textContent = `${Math.round(state.warp * 100)}%`;
+      els.bug.checked = state.bug;
+      els.lowerThird.checked = state.lowerThird;
+      els.stars.checked = state.stars;
+      els.bars.checked = state.bars;
+      els.liveMode.textContent = `Live scene · ${scenes[state.scene]}`;
+      buildPaletteChips();
+      updateScript();
+    }
+
+    function bindInput(el, key) {
+      el.addEventListener('input', (event) => {
+        state[key] = event.target.value;
+        updateScript();
+      });
+    }
+
+    bindInput(els.station, 'station');
+    bindInput(els.city, 'city');
+    bindInput(els.show, 'show');
+    bindInput(els.tagline, 'tagline');
+    bindInput(els.time, 'time');
+
+    els.style.addEventListener('change', (event) => {
+      state.scene = event.target.value;
+      syncUI();
+    });
+
+    [['bloom', 'bloom'], ['noise', 'noise'], ['scan', 'scanlines'], ['warp', 'warp']].forEach(([id, key]) => {
+      els[id].addEventListener('input', (event) => {
+        state[key] = Number(event.target.value) / 100;
+        syncUI();
+      });
+    });
+
+    [['bug', 'bug'], ['lowerThird', 'lowerThird'], ['stars', 'stars'], ['bars', 'bars']].forEach(([id, key]) => {
+      els[id].addEventListener('change', (event) => {
+        state[key] = event.target.checked;
+      });
+    });
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function randomizeAll() {
+      const concept = randomFrom(concepts);
+      state.station = concept.station;
+      state.city = concept.city;
+      state.show = concept.show;
+      state.tagline = concept.tagline;
+      state.time = concept.time;
+      state.scene = randomFrom(Object.keys(scenes));
+      state.palette = randomFrom(Object.keys(palettes));
+      state.bloom = 0.35 + Math.random() * 0.55;
+      state.noise = 0.08 + Math.random() * 0.4;
+      state.scanlines = 0.1 + Math.random() * 0.6;
+      state.warp = 0.08 + Math.random() * 0.45;
+      state.bug = Math.random() > 0.15;
+      state.lowerThird = Math.random() > 0.1;
+      state.stars = Math.random() > 0.2;
+      state.bars = Math.random() > 0.35;
+      syncUI();
+      playStinger(true);
+    }
+
+    els.randomize.addEventListener('click', randomizeAll);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'g') randomizeAll();
+    });
+
+    function roundedRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+
+    function drawStars(ctx, width, height, palette, time) {
+      for (let i = 0; i < 90; i++) {
+        const x = (Math.sin(i * 78.17) * 0.5 + 0.5) * width;
+        const y = ((Math.cos(i * 36.41) * 0.5 + 0.5) * 0.6) * height;
+        const radius = 0.8 + ((i * 13) % 5) * 0.22;
+        const flicker = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 2 + i));
+        ctx.fillStyle = `rgba(255,255,255,${0.08 + flicker * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = palette.glow + '18';
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawOrbit(ctx, w, h, p, t) {
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.48);
+      for (let i = 0; i < 4; i++) {
+        ctx.save();
+        ctx.rotate(t * 0.15 + i * 0.8);
+        ctx.strokeStyle = i % 2 ? p.accent : p.accent2;
+        ctx.globalAlpha = 0.28 + i * 0.08;
+        ctx.lineWidth = 3 + i * 1.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w * (0.13 + i * 0.06), h * (0.08 + i * 0.05), i * 0.32, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.18);
+      gradient.addColorStop(0, p.glow + 'ee');
+      gradient.addColorStop(0.45, p.accent + '99');
+      gradient.addColorStop(1, p.accent + '00');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, w * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawTunnel(ctx, w, h, p, t) {
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.5);
+      ctx.rotate(Math.sin(t * 0.5) * 0.1);
+      for (let i = 0; i < 14; i++) {
+        const progress = (i / 14 + (t * 0.18 % 1)) % 1;
+        const scale = 1 - progress;
+        ctx.strokeStyle = i % 2 ? p.accent : p.accent2;
+        ctx.globalAlpha = 0.08 + scale * 0.45;
+        ctx.lineWidth = 2 + scale * 5;
+        roundedRectPath(ctx, -w * 0.38 * scale, -h * 0.24 * scale, w * 0.76 * scale, h * 0.48 * scale, 18 * scale);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawGrid(ctx, w, h, p, t) {
+      const horizon = h * 0.62;
+      ctx.save();
+      ctx.strokeStyle = p.grid;
+      ctx.globalAlpha = 0.6;
+      for (let y = 0; y < 16; y++) {
+        const py = horizon + Math.pow(y / 15, 1.8) * h * 0.36;
+        ctx.lineWidth = 1 + y * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(0, py);
+        ctx.lineTo(w, py);
+        ctx.stroke();
+      }
+      for (let x = -14; x <= 14; x++) {
+        ctx.beginPath();
+        ctx.moveTo(w * 0.5 + x * 22 + Math.sin(t * 0.4 + x) * 6, horizon);
+        ctx.lineTo(w * 0.5 + x * w * 0.08, h);
+        ctx.stroke();
+      }
+      ctx.fillStyle = p.accent2 + '50';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, horizon, w * 0.13, Math.PI, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSpotlight(ctx, w, h, p, t) {
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.18);
+      for (let i = -2; i <= 2; i++) {
+        const angle = Math.sin(t * 0.7 + i) * 0.32 + i * 0.18;
+        ctx.save();
+        ctx.rotate(angle);
+        const grad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+        grad.addColorStop(0, (i % 2 ? p.accent : p.accent2) + '8f');
+        grad.addColorStop(1, (i % 2 ? p.accent : p.accent2) + '00');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.03, 0);
+        ctx.lineTo(w * 0.03, 0);
+        ctx.lineTo(w * 0.22, h * 0.72);
+        ctx.lineTo(-w * 0.22, h * 0.72);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function drawEclipse(ctx, w, h, p, t) {
+      ctx.save();
+      ctx.translate(w * 0.72, h * 0.28);
+      ctx.rotate(t * 0.25);
+      const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.16);
+      halo.addColorStop(0, p.accent + '00');
+      halo.addColorStop(0.58, p.accent2 + 'bb');
+      halo.addColorStop(1, p.accent + '00');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(0, 0, w * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#02040b';
+      ctx.beginPath();
+      ctx.arc(0, 0, w * 0.09, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawNoise(ctx, w, h, amount) {
+      const alpha = amount * 0.18;
+      for (let i = 0; i < 180; i++) {
+        const x = Math.random() * w;
+        const y = Math.random() * h;
+        const size = Math.random() * 2.2;
+        ctx.fillStyle = `rgba(255,255,255,${Math.random() * alpha})`;
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+
+    function drawScanlines(ctx, w, h, amount) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${0.06 + amount * 0.16})`;
+      for (let y = 0; y < h; y += 4) {
+        ctx.fillRect(0, y, w, 1.5);
+      }
+    }
+
+    function drawSignalBars(ctx, w, h, p, t) {
+      const x = w * 0.08;
+      const y = h * 0.12;
+      const barW = w * 0.015;
+      const gap = barW * 0.45;
+      for (let i = 0; i < 5; i++) {
+        const wave = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 2.6 + i));
+        ctx.fillStyle = i < 4 ? `${p.accent}${Math.floor((80 + wave * 175)).toString(16).padStart(2, '0')}` : `${p.accent2}${Math.floor((90 + wave * 150)).toString(16).padStart(2, '0')}`;
+        ctx.fillRect(x + i * (barW + gap), y + (4 - i) * h * 0.015, barW, h * (0.03 + i * 0.012));
+      }
+    }
+
+    function drawFrame(targetCtx, width, height, seconds) {
+      const p = palettes[state.palette];
+      targetCtx.clearRect(0, 0, width, height);
+      const warpOffset = Math.sin(seconds * 0.8) * state.warp * width * 0.015;
+
+      const bg = targetCtx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, p.bgA);
+      bg.addColorStop(1, p.bgB);
+      targetCtx.fillStyle = bg;
+      targetCtx.fillRect(0, 0, width, height);
+
+      const bloom = targetCtx.createRadialGradient(width * 0.5 + warpOffset, height * 0.35, 0, width * 0.5, height * 0.35, width * 0.58);
+      bloom.addColorStop(0, p.accent + Math.floor(60 + state.bloom * 90).toString(16).padStart(2, '0'));
+      bloom.addColorStop(0.35, p.accent2 + Math.floor(22 + state.bloom * 60).toString(16).padStart(2, '0'));
+      bloom.addColorStop(1, p.bgB + '00');
+      targetCtx.fillStyle = bloom;
+      targetCtx.fillRect(0, 0, width, height);
+
+      if (state.stars) drawStars(targetCtx, width, height, p, seconds);
+
+      if (state.scene === 'orbit') drawOrbit(targetCtx, width, height, p, seconds);
+      if (state.scene === 'tunnel') drawTunnel(targetCtx, width, height, p, seconds);
+      if (state.scene === 'grid') drawGrid(targetCtx, width, height, p, seconds);
+      if (state.scene === 'spotlight') drawSpotlight(targetCtx, width, height, p, seconds);
+      if (state.scene === 'eclipse') drawEclipse(targetCtx, width, height, p, seconds);
+
+      const vignette = targetCtx.createRadialGradient(width * 0.5, height * 0.48, width * 0.15, width * 0.5, height * 0.48, width * 0.7);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.42)');
+      targetCtx.fillStyle = vignette;
+      targetCtx.fillRect(0, 0, width, height);
+
+      targetCtx.save();
+      targetCtx.shadowColor = p.glow;
+      targetCtx.shadowBlur = 40 + state.bloom * 50;
+      targetCtx.fillStyle = p.text;
+      targetCtx.textAlign = 'center';
+      targetCtx.font = `800 ${Math.round(width * 0.085)}px system-ui, sans-serif`;
+      targetCtx.fillText(state.station.toUpperCase(), width * 0.5 + warpOffset, height * 0.42);
+      targetCtx.font = `700 ${Math.round(width * 0.03)}px system-ui, sans-serif`;
+      targetCtx.fillText(state.show.toUpperCase(), width * 0.5 - warpOffset * 0.55, height * 0.515);
+      targetCtx.restore();
+
+      targetCtx.fillStyle = 'rgba(255,255,255,0.72)';
+      targetCtx.textAlign = 'center';
+      targetCtx.font = `500 ${Math.round(width * 0.018)}px system-ui, sans-serif`;
+      targetCtx.fillText(state.tagline, width * 0.5, height * 0.57);
+
+      if (state.lowerThird) {
+        const barY = height * 0.79;
+        const barH = height * 0.12;
+        targetCtx.fillStyle = 'rgba(7, 11, 19, 0.62)';
+        roundedRectPath(targetCtx, width * 0.06, barY, width * 0.88, barH, 18);
+        targetCtx.fill();
+        targetCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = p.accent;
+        targetCtx.fillRect(width * 0.08, barY + barH * 0.22, width * 0.006, barH * 0.56);
+
+        targetCtx.textAlign = 'left';
+        targetCtx.fillStyle = p.text;
+        targetCtx.font = `700 ${Math.round(width * 0.023)}px system-ui, sans-serif`;
+        targetCtx.fillText(state.show, width * 0.1, barY + barH * 0.48);
+        targetCtx.font = `500 ${Math.round(width * 0.017)}px system-ui, sans-serif`;
+        targetCtx.fillStyle = 'rgba(255,255,255,0.78)';
+        targetCtx.fillText(`${state.city} • ${state.time}`, width * 0.1, barY + barH * 0.76);
+      }
+
+      if (state.bug) {
+        const x = width * 0.845;
+        const y = height * 0.08;
+        roundedRectPath(targetCtx, x, y, width * 0.105, height * 0.062, 14);
+        targetCtx.fillStyle = 'rgba(7, 11, 19, 0.68)';
+        targetCtx.fill();
+        targetCtx.strokeStyle = 'rgba(255,255,255,0.11)';
+        targetCtx.stroke();
+        targetCtx.textAlign = 'center';
+        targetCtx.fillStyle = p.text;
+        targetCtx.font = `800 ${Math.round(width * 0.018)}px system-ui, sans-serif`;
+        targetCtx.fillText(state.station.split(' ')[0], x + width * 0.0525, y + height * 0.039);
+      }
+
+      if (state.bars) drawSignalBars(targetCtx, width, height, p, seconds);
+      drawNoise(targetCtx, width, height, state.noise);
+      drawScanlines(targetCtx, width, height, state.scanlines);
+
+      targetCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+      targetCtx.lineWidth = 2;
+      roundedRectPath(targetCtx, width * 0.016, height * 0.03, width * 0.968, height * 0.94, 28);
+      targetCtx.stroke();
+    }
+
+    function animate(now) {
+      drawFrame(ctx, canvas.width, canvas.height, now / 1000);
+      requestAnimationFrame(animate);
+    }
+
+    function playStinger(silent = false) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audioCtx = new AudioContextClass();
+      const master = audioCtx.createGain();
+      master.gain.value = silent ? 0.02 : 0.08;
+      master.connect(audioCtx.destination);
+      const notes = [220, 277.18, 329.63, 493.88];
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        osc.type = index < 2 ? 'sawtooth' : 'triangle';
+        osc.frequency.value = freq;
+        filter.type = 'lowpass';
+        filter.frequency.value = 1300 + index * 260;
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime + index * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + index * 0.09 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + index * 0.09 + 0.42);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(master);
+        osc.start(audioCtx.currentTime + index * 0.09);
+        osc.stop(audioCtx.currentTime + index * 0.09 + 0.45);
+      });
+      setTimeout(() => audioCtx.close().catch(() => {}), 1200);
+    }
+
+    els.stinger.addEventListener('click', () => playStinger(false));
+
+    els.export.addEventListener('click', () => {
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 1600;
+      exportCanvas.height = 900;
+      const exportCtx = exportCanvas.getContext('2d');
+      drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, performance.now() / 1000);
+      const link = document.createElement('a');
+      const slug = `${state.station}-${state.show}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      link.download = `${slug || 'midnight-id'}.png`;
+      link.href = exportCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    els.copyScript.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(els.script.textContent);
+        els.copyScript.textContent = 'Copied';
+        setTimeout(() => { els.copyScript.textContent = 'Copy voiceover'; }, 1200);
+      } catch {
+        els.copyScript.textContent = 'Clipboard blocked';
+        setTimeout(() => { els.copyScript.textContent = 'Copy voiceover'; }, 1400);
+      }
+    });
+
+    syncUI();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
