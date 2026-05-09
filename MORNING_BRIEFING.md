@@ -6,7 +6,8 @@ Why it’s cool:
 - the live animation + audio sting give it real personality
 
 Try it here:
-- [pending publish link]
+- Live app: https://2026-05-09-midnight-id-studio.vercel.app
+- GitHub: https://github.com/nsprdjake/midnight-id-studio
 
 Project folder:
 - `overnight-creative/2026-05-09-midnight-id-studio/`

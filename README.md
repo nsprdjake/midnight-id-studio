@@ -31,6 +31,10 @@ It’s playful, polished, and surprisingly useful as a mood-board / branding toy
 
 Open `index.html` in any modern browser.
 
+Live version:
+- https://2026-05-09-midnight-id-studio.vercel.app
+- https://github.com/nsprdjake/midnight-id-studio
+
 ## Build notes
 
 - No build step
